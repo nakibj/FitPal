@@ -1,0 +1,73 @@
+[
+  {
+    "id": "1",
+    "name": "White T-Shirt",
+    "type": "top",
+    "fitting": "regular",
+    "style": "casual",
+    "color": "white",
+    "warmth_level": 1,
+    "weather_resistance": [
+      "sunny"
+    ],
+    "image_path": "images/white_tshirt.jpg",
+    "tags": [
+      "basic",
+      "versatile"
+    ]
+  },
+  {
+    "id": "2",
+    "name": "Blue Jeans",
+    "type": "bottom",
+    "fitting": "regular",
+    "style": "casual",
+    "color": "blue",
+    "warmth_level": 2,
+    "weather_resistance": [
+      "sunny",
+      "cloudy"
+    ],
+    "image_path": "images/blue_jeans.jpg",
+    "tags": [
+      "denim",
+      "classic"
+    ]
+  },
+  {
+    "id": "3",
+    "name": "Hoodie",
+    "type": "outerwear",
+    "fitting": "oversized",
+    "style": "streetwear",
+    "color": "black",
+    "warmth_level": 4,
+    "weather_resistance": [
+      "cloudy",
+      "rainy"
+    ],
+    "image_path": "images/black_hoodie.jpg",
+    "tags": [
+      "warm",
+      "comfortable"
+    ]
+  },
+  {
+    "id": "4",
+    "name": "Sneakers",
+    "type": "shoes",
+    "fitting": "regular",
+    "style": "streetwear",
+    "color": "white",
+    "warmth_level": 1,
+    "weather_resistance": [
+      "sunny",
+      "cloudy"
+    ],
+    "image_path": "images/white_sneakers.jpg",
+    "tags": [
+      "comfortable",
+      "athletic"
+    ]
+  }
+]

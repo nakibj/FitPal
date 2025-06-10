@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile Setup | FitPal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .gradient-bg {
+      background: linear-gradient(to right, #667eea, #764ba2);
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen">
+  <!-- Navigation -->
+  <nav class="gradient-bg text-white shadow-md">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="text-xl font-bold">👗 FitPal</h1>
+      <a href="/" class="hover:text-gray-200 transition">← Back to Home</a>
+    </div>
+  </nav>
+
+  <!-- Profile Form -->
+  <main class="container mx-auto max-w-3xl px-4 py-10">
+    <div class="bg-white rounded-2xl shadow-xl p-8">
+      <h2 class="text-3xl font-bold text-center mb-6">Set Up Your Profile</h2>
+
+      <form id="profileForm">
+        <!-- Body Measurements -->
+        <section class="mb-10">
+          <h3 class="text-xl font-semibold mb-4">Body Measurements</h3>
+          <div class="grid md:grid-cols-2 gap-5">
+            <div>
+              <label for="height" class="block text-sm font-medium mb-1">Height (cm)</label>
+              <input type="number" id="height" name="height" required class="w-full p-3 border rounded-xl focus:ring-blue-500 focus:outline-none border-gray-300">
+            </div>
+
+            <div>
+              <label for="gender" class="block text-sm font-medium mb-1">Gender</label>
+              <select id="gender" name="gender" required class="w-full p-3 border rounded-xl focus:ring-blue-500 focus:outline-none border-gray-300">
+                <option value="">Select gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="non_binary">Non-binary</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="chest_bust" class="block text-sm font-medium mb-1">Chest/Bust (cm)</label>
+              <input type="number" id="chest_bust" name="chest_bust" required class="w-full p-3 border rounded-xl focus:ring-blue-500 focus:outline-none border-gray-300">
+            </div>
+
+            <div>
+              <label for="waist" class="block text-sm font-medium mb-1">Waist (cm)</label>
+              <input type="number" id="waist" name="waist" required class="w-full p-3 border rounded-xl focus:ring-blue-500 focus:outline-none border-gray-300">
+            </div>
+
+            <div>
+              <label for="hips" class="block text-sm font-medium mb-1">Hips (cm)</label>
+              <input type="number" id="hips" name="hips" required class="w-full p-3 border rounded-xl focus:ring-blue-500 focus:outline-none border-gray-300">
+            </div>
+
+            <div>
+              <label for="shoulder_width" class="block text-sm font-medium mb-1">Shoulder Width (cm)</label>
+              <input type="number" id="shoulder_width" name="shoulder_width" required class="w-full p-3 border rounded-xl focus:ring-blue-500 focus:outline-none border-gray-300">
+            </div>
+          </div>
+        </section>
+
+        <!-- Style Preferences -->
+        <section class="mb-10">
+          <h3 class="text-xl font-semibold mb-4">Style Preferences</h3>
+          <p class="text-gray-600 text-sm mb-4">Select your preferred styles (you can choose more than one):</p>
+          <div class="grid md:grid-cols-2 gap-4">
+            <label class="flex items-start gap-3 p-4 border border-gray-200 rounded-xl hover:border-blue-400 transition cursor-pointer">
+              <input type="checkbox" name="preferred_styles" value="casual" class="mt-1 accent-blue-500">
+              <div>
+                <div class="font-semibold">Casual</div>
+                <div class="text-sm text-gray-500">Comfortable everyday wear</div>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-4 border border-gray-200 rounded-xl hover:border-blue-400 transition cursor-pointer">
+              <input type="checkbox" name="preferred_styles" value="streetwear" class="mt-1 accent-blue-500">
+              <div>
+                <div class="font-semibold">Streetwear</div>
+                <div class="text-sm text-gray-500">Urban, trendy styles</div>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-4 border border-gray-200 rounded-xl hover:border-blue-400 transition cursor-pointer">
+              <input type="checkbox" name="preferred_styles" value="old_money" class="mt-1 accent-blue-500">
+              <div>
+                <div class="font-semibold">Old Money</div>
+                <div class="text-sm text-gray-500">Classic, refined elegance</div>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-4 border border-gray-200 rounded-xl hover:border-blue-400 transition cursor-pointer">
+              <input type="checkbox" name="preferred_styles" value="alt" class="mt-1 accent-blue-500">
+              <div>
+                <div class="font-semibold">Alternative</div>
+                <div class="text-sm text-gray-500">Unique, expressive styles</div>
+              </div>
+            </label>
+          </div>
+        </section>
+
+        <!-- Submit -->
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 rounded-xl transition">
+          Save Profile & Generate Avatar
+        </button>
+      </form>
+    </div>
+  </main>
+
+  <!-- Form Submission Script -->
+  <script>
+    document.getElementById('profileForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const styles = Array.from(document.querySelectorAll('input[name="preferred_styles"]:checked'))
+        .map(cb => cb.value);
+
+      if (styles.length === 0) {
+        alert('Please select at least one style preference');
+        return;
+      }
+
+      const data = {
+        height: document.getElementById('height').value,
+        gender: document.getElementById('gender').value,
+        chest_bust: document.getElementById('chest_bust').value,
+        waist: document.getElementById('waist').value,
+        hips: document.getElementById('hips').value,
+        shoulder_width: document.getElementById('shoulder_width').value,
+        preferred_styles: styles
+      };
+
+      try {
+        const response = await fetch('/setup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          window.location.href = '/profile';
+        } else {
+          alert('Something went wrong. Please try again.');
+        }
+      } catch (error) {
+        alert('Error saving profile. Please try again later.');
+      }
+    });
+  </script>
+</body>
+</html>

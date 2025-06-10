@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Wardrobe - Virtual Closet</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .gradient-bg {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <!-- Navbar -->
+  <nav class="gradient-bg text-white p-4 shadow-lg">
+    <div class="container mx-auto flex justify-between items-center">
+      <h1 class="text-2xl font-bold">👗 Virtual Closet</h1>
+      <a href="/" class="hover:text-gray-200">&larr; Back to Home</a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="container mx-auto px-4 py-10 max-w-5xl">
+    <section class="bg-white rounded-xl shadow-lg p-8 mb-10">
+      <h2 class="text-3xl font-bold mb-6 text-center">Add New Clothing Item</h2>
+
+      <form id="clothingForm" class="grid md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Item Name</label>
+          <input type="text" id="itemName" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Color</label>
+          <input type="text" id="itemColor" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Type</label>
+          <select id="itemType" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+            <option value="">Select type</option>
+            <option value="top">Top</option>
+            <option value="bottom">Bottom</option>
+            <option value="outerwear">Outerwear</option>
+            <option value="shoes">Shoes</option>
+            <option value="accessory">Accessory</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Fitting</label>
+          <select id="itemFitting" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+            <option value="">Select fitting</option>
+            <option value="tight">Tight</option>
+            <option value="regular">Regular</option>
+            <option value="oversized">Oversized</option>
+            <option value="long">Long</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Style</label>
+          <select id="itemStyle" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+            <option value="">Select style</option>
+            <option value="casual">Casual</option>
+            <option value="streetwear">Streetwear</option>
+            <option value="old_money">Old Money</option>
+            <option value="alt">Alternative</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Warmth Level (1-5)</label>
+          <select id="itemWarmth" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+            <option value="">Select warmth</option>
+            <option value="1">1 - Very Light</option>
+            <option value="2">2 - Light</option>
+            <option value="3">3 - Medium</option>
+            <option value="4">4 - Warm</option>
+            <option value="5">5 - Very Warm</option>
+          </select>
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Weather Resistance</label>
+          <div class="flex flex-wrap gap-4">
+            <label class="flex items-center"><input type="checkbox" value="sunny" class="mr-2">Sunny</label>
+            <label class="flex items-center"><input type="checkbox" value="cloudy" class="mr-2">Cloudy</label>
+            <label class="flex items-center"><input type="checkbox" value="rainy" class="mr-2">Rainy</label>
+            <label class="flex items-center"><input type="checkbox" value="snowy" class="mr-2">Snowy</label>
+          </div>
+        </div>
+
+        <div class="md:col-span-2 text-center">
+          <button type="submit" class="bg-green-500 text-white py-3 px-6 rounded-lg hover:bg-green-600 transition-colors font-semibold">
+            Add to Wardrobe
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Wardrobe Items Display -->
+    <section class="bg-white rounded-xl shadow-lg p-8">
+      <h3 class="text-2xl font-bold mb-6 text-center">Your Items</h3>
+      <div id="wardrobeItems" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Dynamic clothing items will appear here -->
+      </div>
+    </section>
+  </main>
+
+  <!-- Script for form handling -->
+  <script>
+    async function loadWardrobeItems() {
+      try {
+        const response = await fetch('/wardrobe_items');
+        const items = await response.json();
+        const container = document.getElementById('wardrobeItems');
+        container.innerHTML = '';
+
+        if (items.length === 0) {
+          container.innerHTML = '<p class="text-gray-500 text-center col-span-full">No items in wardrobe yet. Add some above!</p>';
+          return;
+        }
+
+        items.forEach(item => {
+          container.innerHTML += `
+            <div class="border border-gray-200 rounded-xl p-4 hover:shadow-lg transition-shadow">
+              <h4 class="font-semibold text-lg">${item.name}</h4>
+              <p class="text-gray-600">${item.color} ${item.type}</p>
+              <p class="text-sm text-gray-500">${item.fitting} fit • ${item.style}</p>
+              <div class="mt-2">
+                <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">Warmth: ${item.warmth_level}/5</span>
+              </div>
+            </div>
+          `;
+        });
+      } catch (error) {
+        console.error('Error loading wardrobe:', error);
+      }
+    }
+
+    document.getElementById('clothingForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const weatherResistance = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+
+      const data = {
+        name: document.getElementById('itemName').value,
+        color: document.getElementById('itemColor').value,
+        type: document.getElementById('itemType').value,
+        fitting: document.getElementById('itemFitting').value,
+        style: document.getElementById('itemStyle').value,
+        warmth_level: document.getElementById('itemWarmth').value,
+        weather_resistance: weatherResistance,
+        tags: []
+      };
+
+      try {
+        const response = await fetch('/add_clothing', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          alert(result.message);
+          document.getElementById('clothingForm').reset();
+          loadWardrobeItems();
+        }
+      } catch (error) {
+        alert('Error adding item. Please try again.');
+      }
+    });
+
+    // Load wardrobe items on page load
+    loadWardrobeItems();
+  </script>
+</body>
+</html>

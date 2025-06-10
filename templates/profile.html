@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Profile | Virtual Closet</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .gradient-bg {
+      background: linear-gradient(to right, #667eea, #764ba2);
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen">
+
+  <!-- Navigation -->
+  <nav class="gradient-bg text-white shadow-md">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="text-xl font-bold">👗 Virtual Closet</h1>
+      <a href="/" class="hover:text-gray-200 transition">← Home</a>
+    </div>
+  </nav>
+
+  <!-- Profile Display -->
+  <main class="container mx-auto max-w-3xl px-4 py-10">
+    <div class="bg-white rounded-2xl shadow-xl p-8">
+      <h2 class="text-3xl font-bold text-center mb-6">Your Profile</h2>
+
+      <!-- Avatar Preview -->
+      <div class="flex justify-center mb-6">
+        <img id="avatarImage" src="/static/placeholder.png" alt="Avatar" class="w-40 h-40 rounded-full border-4 border-blue-400" />
+      </div>
+
+      <!-- Profile Data -->
+      <div class="grid md:grid-cols-2 gap-4 mb-6" id="profileData"></div>
+
+      <div class="text-center">
+        <a href="/setup" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl transition">
+          Edit Profile
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Fetch profile data
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const response = await fetch('/api/profile');
+        const data = await response.json();
+
+        const fieldMap = {
+          height: 'Height (cm)',
+          gender: 'Gender',
+          chest_bust: 'Chest/Bust (cm)',
+          waist: 'Waist (cm)',
+          hips: 'Hips (cm)',
+          shoulder_width: 'Shoulder Width (cm)',
+          preferred_styles: 'Preferred Styles'
+        };
+
+        const profileContainer = document.getElementById('profileData');
+        for (let key in fieldMap) {
+          const value = Array.isArray(data[key]) ? data[key].join(', ') : data[key];
+          profileContainer.innerHTML += `
+            <div>
+              <div class="text-sm text-gray-500">${fieldMap[key]}</div>
+              <div class="text-lg font-medium">${value}</div>
+            </div>
+          `;
+        }
+
+      } catch (err) {
+        alert("Could not load profile data.");
+      }
+    });
+  </script>
+</body>
+</html>
