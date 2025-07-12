@@ -3,121 +3,269 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Profile Setup | FitPal</title>
+  <title>Choose Your Avatar | Virtual Closet</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     .gradient-bg {
-      background: linear-gradient(to right, #667eea, #764ba2);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .status-message {
+        margin-top: 1rem;
+        padding: 0.75rem;
+        border-radius: 0.375rem;
+        font-weight: 500;
+    }
+    .status-message.success {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+    .status-message.error {
+        background-color: #fee2e2;
+        color: #991b1b;
+    }
+    .status-message.info {
+        background-color: #e0f2fe;
+        color: #0c4a6e;
+    }
+    .avatar-option {
+      width: 200px;
+      height: 250px;
+      background: #f3f4f6;
+      border: 3px solid #e5e7eb;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .avatar-option:hover {
+      border-color: #3b82f6;
+      transform: translateY(-4px);
+      box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+    }
+    .avatar-option.selected {
+      border-color: #1d4ed8;
+      background: #eff6ff;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(29, 78, 216, 0.25);
+    }
+    .avatar-option.selected::after {
+      content: '✓';
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #1d4ed8;
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    .avatar-placeholder {
+      width: 120px;
+      height: 160px;
+      background: #d1d5db;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+      font-size: 48px;
+      color: #6b7280;
+    }
+    .avatar-label {
+      font-weight: 600;
+      color: #374151;
+      text-align: center;
     }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-800 min-h-screen">
-  <!-- Navigation -->
   <nav class="gradient-bg text-white shadow-md">
     <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-      <h1 class="text-xl font-bold">👗 FitPal</h1>
+      <h1 class="text-xl font-bold">👗 Virtual Closet</h1>
       <a href="/" class="hover:text-gray-200 transition">← Back to Home</a>
     </div>
   </nav>
 
-  <!-- Profile Form -->
-  <main class="container mx-auto max-w-3xl px-4 py-10">
+  <main class="container mx-auto max-w-6xl px-4 py-10">
     <div class="bg-white rounded-2xl shadow-xl p-8">
-      <h2 class="text-3xl font-bold text-center mb-6">Set Up Your Profile</h2>
+      <div class="text-center mb-10">
+        <h2 class="text-4xl font-bold mb-4">Choose Your Avatar</h2>
+        <p class="text-xl text-gray-600">Select the avatar that looks most similar to you</p>
+      </div>
 
-      <form id="profileForm">
-        <!-- Body Measurements -->
-        <section class="mb-10">
-          <h3 class="text-xl font-semibold mb-4">Body Measurements</h3>
-          <div class="grid md:grid-cols-2 gap-5">
-            <div>
-              <label for="height" class="block text-sm font-medium mb-1">Height (cm)</label>
-              <input type="number" id="height" name="height" required class="w-full p-3 border rounded-xl focus:ring-blue-500 focus:outline-none border-gray-300">
-            </div>
-
-            <div>
-              <label for="gender" class="block text-sm font-medium mb-1">Gender</label>
-              <select id="gender" name="gender" required class="w-full p-3 border rounded-xl focus:ring-blue-500 focus:outline-none border-gray-300">
-                <option value="">Select gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="non_binary">Non-binary</option>
-              </select>
-            </div>
-
-            <div>
-              <label for="chest_bust" class="block text-sm font-medium mb-1">Chest/Bust (cm)</label>
-              <input type="number" id="chest_bust" name="chest_bust" required class="w-full p-3 border rounded-xl focus:ring-blue-500 focus:outline-none border-gray-300">
-            </div>
-
-            <div>
-              <label for="waist" class="block text-sm font-medium mb-1">Waist (cm)</label>
-              <input type="number" id="waist" name="waist" required class="w-full p-3 border rounded-xl focus:ring-blue-500 focus:outline-none border-gray-300">
-            </div>
-
-            <div>
-              <label for="hips" class="block text-sm font-medium mb-1">Hips (cm)</label>
-              <input type="number" id="hips" name="hips" required class="w-full p-3 border rounded-xl focus:ring-blue-500 focus:outline-none border-gray-300">
-            </div>
-
-            <div>
-              <label for="shoulder_width" class="block text-sm font-medium mb-1">Shoulder Width (cm)</label>
-              <input type="number" id="shoulder_width" name="shoulder_width" required class="w-full p-3 border rounded-xl focus:ring-blue-500 focus:outline-none border-gray-300">
+      <form id="avatarForm">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-10">
+          <!-- Fat Man -->
+          <div class="avatar-option" data-avatar="fat_man">
+            <div class="avatar-placeholder">
+              👨
             </div>
           </div>
-        </section>
 
-        <!-- Style Preferences -->
-        <section class="mb-10">
-          <h3 class="text-xl font-semibold mb-4">Style Preferences</h3>
-          <p class="text-gray-600 text-sm mb-4">Select your preferred styles (you can choose more than one):</p>
-          <div class="grid md:grid-cols-2 gap-4">
-            <label class="flex items-start gap-3 p-4 border border-gray-200 rounded-xl hover:border-blue-400 transition cursor-pointer">
-              <input type="checkbox" name="preferred_styles" value="casual" class="mt-1 accent-blue-500">
-              <div>
-                <div class="font-semibold">Casual</div>
-                <div class="text-sm text-gray-500">Comfortable everyday wear</div>
-              </div>
-            </label>
-
-            <label class="flex items-start gap-3 p-4 border border-gray-200 rounded-xl hover:border-blue-400 transition cursor-pointer">
-              <input type="checkbox" name="preferred_styles" value="streetwear" class="mt-1 accent-blue-500">
-              <div>
-                <div class="font-semibold">Streetwear</div>
-                <div class="text-sm text-gray-500">Urban, trendy styles</div>
-              </div>
-            </label>
-
-            <label class="flex items-start gap-3 p-4 border border-gray-200 rounded-xl hover:border-blue-400 transition cursor-pointer">
-              <input type="checkbox" name="preferred_styles" value="old_money" class="mt-1 accent-blue-500">
-              <div>
-                <div class="font-semibold">Old Money</div>
-                <div class="text-sm text-gray-500">Classic, refined elegance</div>
-              </div>
-            </label>
-
-            <label class="flex items-start gap-3 p-4 border border-gray-200 rounded-xl hover:border-blue-400 transition cursor-pointer">
-              <input type="checkbox" name="preferred_styles" value="alt" class="mt-1 accent-blue-500">
-              <div>
-                <div class="font-semibold">Alternative</div>
-                <div class="text-sm text-gray-500">Unique, expressive styles</div>
-              </div>
-            </label>
+          <!-- Fat Woman -->
+          <div class="avatar-option" data-avatar="fat_woman">
+            <div class="avatar-placeholder">
+              👩
+            </div>
           </div>
-        </section>
 
-        <!-- Submit -->
-        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 rounded-xl transition">
-          Save Profile & Generate Avatar
+          <!-- Skinny Man -->
+          <div class="avatar-option" data-avatar="skinny_man">
+            <div class="avatar-placeholder">
+              🧑
+            </div>
+          </div>
+
+          <!-- Skinny Woman -->
+          <div class="avatar-option" data-avatar="skinny_woman">
+            <div class="avatar-placeholder">
+              👱‍♀️
+            </div>
+          </div>
+
+          <!-- Fit Man -->
+          <div class="avatar-option" data-avatar="fit_man">
+            <div class="avatar-placeholder">
+              💪
+            </div>
+          </div>
+
+          <!-- Fit Woman -->
+          <div class="avatar-option" data-avatar="fit_woman">
+            <div class="avatar-placeholder">
+              🏃‍♀️
+            </div>
+          </div>
+        </div>
+
+        <!-- Style Preferences Section -->
+        <div class="bg-gray-50 rounded-xl p-6 mb-8">
+          <h3 class="text-xl font-semibold mb-4 text-gray-700">Preferred Styles</h3>
+          <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <input type="checkbox" id="style_streetwear" name="preferred_styles" value="streetwear" class="hidden peer" />
+              <label for="style_streetwear" class="block p-4 border-2 border-gray-300 rounded-lg cursor-pointer text-center hover:border-blue-500 peer-checked:border-blue-600 peer-checked:bg-blue-50 peer-checked:text-blue-700 transition">Streetwear</label>
+            </div>
+            <div>
+              <input type="checkbox" id="style_old_money" name="preferred_styles" value="old_money" class="hidden peer" />
+              <label for="style_old_money" class="block p-4 border-2 border-gray-300 rounded-lg cursor-pointer text-center hover:border-blue-500 peer-checked:border-blue-600 peer-checked:bg-blue-50 peer-checked:text-blue-700 transition">Old Money</label>
+            </div>
+            <div>
+              <input type="checkbox" id="style_alt" name="preferred_styles" value="alt" class="hidden peer" />
+              <label for="style_alt" class="block p-4 border-2 border-gray-300 rounded-lg cursor-pointer text-center hover:border-blue-500 peer-checked:border-blue-600 peer-checked:bg-blue-50 peer-checked:text-blue-700 transition">Alt</label>
+            </div>
+            <div>
+                <input type="checkbox" id="style_casual" name="preferred_styles" value="casual" class="hidden peer" />
+                <label for="style_casual" class="block p-4 border-2 border-gray-300 rounded-lg cursor-pointer text-center hover:border-blue-500 peer-checked:border-blue-600 peer-checked:bg-blue-50 peer-checked:text-blue-700 transition">Casual</label>
+            </div>
+          </div>
+        </div>
+
+        <input type="hidden" id="selected_avatar" name="selected_avatar" />
+        <input type="hidden" id="latitude" name="latitude" />
+        <input type="hidden" id="longitude" name="longitude" />
+
+        <div id="location-status" class="status-message hidden"></div>
+
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-6 rounded-xl transition text-lg">
+          Save Profile
         </button>
       </form>
     </div>
   </main>
 
-  <!-- Form Submission Script -->
   <script>
-    document.getElementById('profileForm').addEventListener('submit', async (e) => {
+    const locationStatusDiv = document.getElementById('location-status');
+    let selectedAvatar = null;
+
+    function showStatus(message, type) {
+        locationStatusDiv.textContent = message;
+        locationStatusDiv.classList.remove('hidden', 'success', 'error', 'info');
+        locationStatusDiv.classList.add(type);
+    }
+
+    // Handle avatar selection
+    document.querySelectorAll('.avatar-option').forEach(option => {
+      option.addEventListener('click', () => {
+        // Remove selection from all options
+        document.querySelectorAll('.avatar-option').forEach(opt => {
+          opt.classList.remove('selected');
+        });
+        
+        // Add selection to clicked option
+        option.classList.add('selected');
+        selectedAvatar = option.dataset.avatar;
+        document.getElementById('selected_avatar').value = selectedAvatar;
+        
+        console.log('Selected avatar:', selectedAvatar);
+      });
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Attempt to get location when the page loads
+        if ("geolocation" in navigator) {
+            showStatus('🌍 Requesting your location for weather-based outfit recommendations...', 'info');
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    document.getElementById('latitude').value = lat;
+                    document.getElementById('longitude').value = lon;
+                    showStatus(`✅ Location captured successfully! (${lat.toFixed(4)}, ${lon.toFixed(4)})`, 'success');
+                    console.log('📍 Location captured:', lat, lon);
+                    console.log('📍 Location accuracy:', position.coords.accuracy, 'meters');
+                },
+                (error) => {
+                    let errorMessage = '⚠️ Could not get location.';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage = '❌ Location permission denied. You can still use the app, but weather-based recommendations will be limited.';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage = '❌ Location information is unavailable.';
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage = '⏰ Location request timed out. Please try again.';
+                            break;
+                        default:
+                            errorMessage = '❌ An unknown error occurred while getting location.';
+                            break;
+                    }
+                    showStatus(errorMessage, 'error');
+                    console.error("Geolocation error:", error);
+                    // Explicitly set empty values when location fails
+                    document.getElementById('latitude').value = '';
+                    document.getElementById('longitude').value = '';
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 15000,  // Increased timeout to 15 seconds
+                    maximumAge: 300000  // Allow cached position up to 5 minutes old
+                }
+            );
+        } else {
+            showStatus('❌ Geolocation is not supported by your browser.', 'error');
+            document.getElementById('latitude').value = '';
+            document.getElementById('longitude').value = '';
+        }
+    });
+
+    document.getElementById('avatarForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+
+      if (!selectedAvatar) {
+        alert('Please select an avatar that looks most similar to you');
+        return;
+      }
 
       const styles = Array.from(document.querySelectorAll('input[name="preferred_styles"]:checked'))
         .map(cb => cb.value);
@@ -127,15 +275,30 @@
         return;
       }
 
+      const latitude = document.getElementById('latitude').value;
+      const longitude = document.getElementById('longitude').value;
+
       const data = {
-        height: document.getElementById('height').value,
-        gender: document.getElementById('gender').value,
-        chest_bust: document.getElementById('chest_bust').value,
-        waist: document.getElementById('waist').value,
-        hips: document.getElementById('hips').value,
-        shoulder_width: document.getElementById('shoulder_width').value,
-        preferred_styles: styles
+        selected_avatar: selectedAvatar,
+        preferred_styles: styles,
+        latitude: latitude || null,
+        longitude: longitude || null
       };
+
+      console.log('📤 Sending profile data:', data);
+      console.log('📍 Location data being sent:', {
+        latitude: data.latitude,
+        longitude: data.longitude,
+        hasLocation: !!(data.latitude && data.longitude),
+        latitudeType: typeof data.latitude,
+        longitudeType: typeof data.longitude
+      });
+
+      // Show loading state
+      const submitButton = e.target.querySelector('button[type="submit"]');
+      const originalText = submitButton.textContent;
+      submitButton.textContent = 'Saving Profile...';
+      submitButton.disabled = true;
 
       try {
         const response = await fetch('/setup', {
@@ -147,14 +310,23 @@
         });
 
         const result = await response.json();
+        console.log('📥 Server response:', result);
 
         if (result.success) {
-          window.location.href = '/profile';
+          showStatus('✅ Profile saved successfully! Redirecting to your profile...', 'success');
+          setTimeout(() => {
+            window.location.href = '/profile';
+          }, 1500);
         } else {
-          alert('Something went wrong. Please try again.');
+          showStatus('❌ Error: ' + (result.message || 'Something went wrong'), 'error');
+          submitButton.textContent = originalText;
+          submitButton.disabled = false;
         }
       } catch (error) {
-        alert('Error saving profile. Please try again later.');
+        console.error('❌ Network error:', error);
+        showStatus('❌ Network error occurred. Please check your connection and try again.', 'error');
+        submitButton.textContent = originalText;
+        submitButton.disabled = false;
       }
     });
   </script>

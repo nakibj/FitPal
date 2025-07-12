@@ -65,6 +65,7 @@ class WeatherData:
     humidity: int
     wind_speed: float
     feels_like: float
+    description: str = ""
 
 @dataclass
 class Avatar:
@@ -96,10 +97,10 @@ class WeatherService:
         # In a real app, you'd make an API call here
         # For demo purposes, returning mock data
         mock_conditions = [
-            WeatherData(22.0, WeatherCondition.SUNNY, 45, 5.2, 24.0),
-            WeatherData(15.0, WeatherCondition.RAINY, 80, 12.1, 12.0),
-            WeatherData(8.0, WeatherCondition.CLOUDY, 65, 8.5, 6.0),
-            WeatherData(28.0, WeatherCondition.SUNNY, 35, 3.1, 30.0)
+            WeatherData(22.0, WeatherCondition.SUNNY, 45, 5.2, 24.0, "clear sky"),
+            WeatherData(15.0, WeatherCondition.RAINY, 80, 12.1, 12.0, "light rain"),
+            WeatherData(8.0, WeatherCondition.CLOUDY, 65, 8.5, 6.0, "overcast clouds"),
+            WeatherData(28.0, WeatherCondition.SUNNY, 35, 3.1, 30.0, "clear sky")
         ]
         return random.choice(mock_conditions)
 
@@ -222,12 +223,15 @@ class OutfitRecommendationEngine:
         return recommendations
 
 class VirtualClosetApp:
-    def __init__(self, weather_api_key: str):
-        self.weather_service = WeatherService(weather_api_key)
-        self.recommendation_engine = OutfitRecommendationEngine()
+    def __init__(self, weather_service=None, recommendation_engine=None, wardrobe=None):
+        self.weather_service = weather_service or WeatherService("api_key_here")
+        self.recommendation_engine = recommendation_engine or OutfitRecommendationEngine()
         self.user_avatar = None
-        self.wardrobe = []
+        self.wardrobe = wardrobe or []
         self.user_location = "New York"  # Default location
+        self.latitude = None
+        self.longitude = None
+        self.selected_avatar = None
     
     def setup_user_profile(self, measurements: BodyMeasurements, 
                           preferred_styles: List[Style]):
