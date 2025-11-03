@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Wardrobe - Virtual Closet</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .gradient-bg {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .upload-area {
+      border: 3px dashed #cbd5e0;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      min-height: 200px;
+    }
+    
+    .upload-area:hover {
+      border-color: #4299e1;
+      background-color: #ebf8ff;
+    }
+    
+    .upload-area.dragover {
+      border-color: #3182ce;
+      background-color: #bee3f8;
+      transform: scale(1.02);
+    }
+    
+    .image-preview {
+      max-width: 150px;
+      max-height: 150px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+    
+    .analysis-card {
+      background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+      border-left: 4px solid #4299e1;
+    }
+    
+    .loading-spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #4299e1;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .confidence-bar {
+      height: 6px;
+      background: #e2e8f0;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    
+    .confidence-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #fc8181 0%, #f6e05e 50%, #68d391 100%);
+      transition: width 0.3s ease;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen">
+  <!-- Navbar -->
+  <nav class="gradient-bg text-white shadow-md">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="text-xl font-bold">🤖 AI Wardrobe</h1>
+      <div class="space-x-4">
+        <a href="/wardrobe" class="hover:text-gray-200 transition">Manual Entry</a>
+        <a href="/" class="hover:text-gray-200 transition">← Back to Home</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Photo Guidelines Modal -->
+  <div id="photoGuidelinesModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+      <div class="flex justify-between items-center mb-4">
+        <h4 class="text-xl font-bold">📷 Photo Tips for Better AI Analysis</h4>
+        <button id="closeGuidelinesBtn" class="text-gray-500 hover:text-gray-700">✕</button>
+      </div>
+      
+      <div class="space-y-4">
+        <div class="bg-green-50 p-3 rounded">
+          <h5 class="font-semibold text-green-800 mb-2">✅ DO:</h5>
+          <ul class="text-sm text-green-700 space-y-1">
+            <li>• Take photos on a plain background (white/light colored)</li>
+            <li>• Lay clothing flat or hang it properly</li>
+            <li>• Ensure good lighting (natural light is best)</li>
+            <li>• Show the full item in frame</li>
+            <li>• Take close-up photos of single items</li>
+            <li>• Make sure the item is the main focus</li>
+          </ul>
+        </div>
+        
+        <div class="bg-red-50 p-3 rounded">
+          <h5 class="font-semibold text-red-800 mb-2">❌ DON'T:</h5>
+          <ul class="text-sm text-red-700 space-y-1">
+            <li>• Take photos with cluttered backgrounds</li>
+            <li>• Include multiple items in one photo</li>
+            <li>• Use dim lighting or flash</li>
+            <li>• Take blurry or tilted photos</li>
+            <li>• Photograph items while wearing them</li>
+          </ul>
+        </div>
+        
+        <div class="bg-blue-50 p-3 rounded">
+          <h5 class="font-semibold text-blue-800 mb-2">💡 Pro Tips:</h5>
+          <ul class="text-sm text-blue-700 space-y-1">
+            <li>• Use a white sheet or wall as background</li>
+            <li>• Take photos near a window for natural light</li>
+            <li>• Hold camera steady or use a surface</li>
+            <li>• Zoom in so the item fills most of the frame</li>
+            <li>• Take photos during daytime for best results</li>
+          </ul>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-4 mt-4">
+          <div class="text-center">
+            <div class="text-4xl mb-2">✅</div>
+            <p class="text-xs text-green-600">Good: Plain background, well-lit, single item</p>
+          </div>
+          <div class="text-center">
+            <div class="text-4xl mb-2">❌</div>
+            <p class="text-xs text-red-600">Bad: Cluttered, dark, multiple items</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="mt-6 text-center">
+        <button id="gotItBtn" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600">
+          Got it! Let's upload
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="container mx-auto px-4 py-8 max-w-6xl">
+    
+    <!-- AI Upload Section -->
+    <section class="bg-white rounded-xl shadow-lg p-8 mb-8">
+      <div class="text-center mb-6">
+        <h2 class="text-3xl font-bold mb-2">✨ AI-Powered Wardrobe Analysis</h2>
+        <p class="text-gray-600">Upload photos of your clothes and let AI automatically categorize them!</p>
+        <button onclick="showPhotoGuidelines()" class="text-sm text-blue-500 hover:text-blue-700 mt-2 underline">
+          📷 View photo tips for better results
+        </button>
+      </div>
+
+      <!-- Upload Area -->
+      <div id="uploadArea" class="upload-area bg-gray-50 flex flex-col items-center justify-center p-8 cursor-pointer">
+        <div class="text-center">
+          <div class="text-6xl mb-4">📷</div>
+          <h3 class="text-xl font-semibold mb-2">Drop your clothing images here</h3>
+          <p class="text-gray-600 mb-4">or click to browse files</p>
+          <div class="bg-blue-500 text-white px-6 py-2 rounded-lg inline-block hover:bg-blue-600 transition">
+            Choose Images
+          </div>
+          <input type="file" id="fileInput" multiple accept="image/*" class="hidden">
+          <p class="text-sm text-gray-500 mt-4">Supports: JPG, PNG, GIF (max 16MB each)</p>
+          <button onclick="showPhotoGuidelines()" class="text-xs text-blue-500 hover:text-blue-700 mt-2">
+            📷 Photo tips for better AI analysis
+          </button>
+        </div>
+      </div>
+
+      <!-- Upload Progress -->
+      <div id="uploadProgress" class="hidden mt-6">
+        <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
+          <div class="flex items-center">
+            <div class="loading-spinner mr-3"></div>
+            <div>
+              <h4 class="font-medium text-blue-900">AI is analyzing your clothes...</h4>
+              <p class="text-blue-700 text-sm">This may take a few seconds per image</p>
+            </div>
+          </div>
+          <div class="mt-3">
+            <div class="bg-blue-200 rounded-full h-2">
+              <div id="progressBar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+            <p id="progressText" class="text-sm text-blue-600 mt-1">Processing 0 of 0 images...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analysis Results -->
+      <div id="analysisResults" class="hidden mt-8">
+        <h3 class="text-2xl font-bold mb-4">🎯 Analysis Results</h3>
+        <div id="resultsContainer" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Results will be populated here -->
+        </div>
+        
+        <!-- Batch Actions -->
+        <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+          <h4 class="font-semibold mb-3">Batch Actions</h4>
+          <div class="flex flex-wrap gap-3">
+            <button id="saveAllBtn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
+              💾 Save All to Wardrobe
+            </button>
+            <button id="clearResultsBtn" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition">
+              🗑️ Clear Results
+            </button>
+            <button id="analyzeMoreBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
+              📷 Analyze More Images
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Analysis Section -->
+    <section class="bg-white rounded-xl shadow-lg p-6 mb-8">
+      <h3 class="text-xl font-bold mb-4">🔍 Quick Single Item Analysis</h3>
+      <p class="text-gray-600 mb-4">Test AI analysis on a single image before batch upload</p>
+      
+      <div class="flex items-center space-x-4">
+        <input type="file" id="quickAnalysisInput" accept="image/*" class="hidden">
+        <button id="quickAnalysisBtn" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 transition">
+          📸 Quick Analysis
+        </button>
+        <div id="quickAnalysisResult" class="flex-1">
+          <!-- Quick analysis result will appear here -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Current Wardrobe Section -->
+    <section class="bg-white rounded-xl shadow-lg p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-2xl font-bold">👔 Your Current Wardrobe</h3>
+        <div class="space-x-2">
+          <button id="refreshWardrobeBtn" class="bg-gray-500 text-white px-3 py-1 rounded text-sm hover:bg-gray-600 transition">
+            🔄 Refresh
+          </button>
+          <button id="viewStatsBtn" class="bg-indigo-500 text-white px-3 py-1 rounded text-sm hover:bg-indigo-600 transition">
+            📊 Stats
+          </button>
+        </div>
+      </div>
+      
+      <div id="currentWardrobe" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <!-- Current wardrobe items will be loaded here -->
+      </div>
+      
+      <!-- Wardrobe Stats Modal -->
+      <div id="statsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+          <div class="flex justify-between items-center mb-4">
+            <h4 class="text-xl font-bold">📊 Wardrobe Statistics</h4>
+            <button id="closeStatsBtn" class="text-gray-500 hover:text-gray-700">✕</button>
+          </div>
+          <div id="statsContent">
+            <!-- Stats content will be loaded here -->
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Scripts -->
+  <script>
+    let currentAnalysisResults = [];
+    let isAnalyzing = false;
+
+    // DOM Elements
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const uploadProgress = document.getElementById('uploadProgress');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const analysisResults = document.getElementById('analysisResults');
+    const resultsContainer = document.getElementById('resultsContainer');
+    const quickAnalysisInput = document.getElementById('quickAnalysisInput');
+    const quickAnalysisBtn = document.getElementById('quickAnalysisBtn');
+    const quickAnalysisResult = document.getElementById('quickAnalysisResult');
+
+    // Show guidelines modal for first-time users
+    document.addEventListener('DOMContentLoaded', () => {
+        const hasSeenGuidelines = localStorage.getItem('hasSeenPhotoGuidelines');
+        if (!hasSeenGuidelines) {
+            document.getElementById('photoGuidelinesModal').classList.remove('hidden');
+        }
+        loadCurrentWardrobe();
+    });
+
+    // Photo Guidelines Modal Functions
+    function showPhotoGuidelines() {
+        document.getElementById('photoGuidelinesModal').classList.remove('hidden');
+    }
+
+    document.getElementById('closeGuidelinesBtn').addEventListener('click', () => {
+        document.getElementById('photoGuidelinesModal').classList.add('hidden');
+    });
+
+    document.getElementById('gotItBtn').addEventListener('click', () => {
+        localStorage.setItem('hasSeenPhotoGuidelines', 'true');
+        document.getElementById('photoGuidelinesModal').classList.add('hidden');
+    });
+
+    // File Upload Handlers
+    uploadArea.addEventListener('click', () => {
+      if (!isAnalyzing) fileInput.click();
+    });
+
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.classList.remove('dragover');
+      if (!isAnalyzing) {
+        const files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
+        if (files.length > 0) {
+          analyzeImages(files);
+        }
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      const files = Array.from(e.target.files);
+      if (files.length > 0) {
+        analyzeImages(files);
+      }
+    });
+
+    // Quick Analysis
+    quickAnalysisBtn.addEventListener('click', () => {
+      quickAnalysisInput.click();
+    });
+
+    quickAnalysisInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        performQuickAnalysis(file);
+      }
+    });
+
+    // Batch Actions
+    document.getElementById('saveAllBtn').addEventListener('click', saveAllToWardrobe);
+    document.getElementById('clearResultsBtn').addEventListener('click', clearResults);
+    document.getElementById('analyzeMoreBtn').addEventListener('click', () => {
+      fileInput.click();
+    });
+
+    // Wardrobe Management
+    document.getElementById('refreshWardrobeBtn').addEventListener('click', loadCurrentWardrobe);
+    document.getElementById('viewStatsBtn').addEventListener('click', showWardrobeStats);
+    document.getElementById('closeStatsBtn').addEventListener('click', () => {
+      document.getElementById('statsModal').classList.add('hidden');
+    });
+
+    // Main Analysis Function
+    async function analyzeImages(files) {
+      if (isAnalyzing) return;
+      isAnalyzing = true;
+      
+      // Show progress
+      uploadProgress.classList.remove('hidden');
+      analysisResults.classList.add('hidden');
+      
+      const formData = new FormData();
+      files.forEach(file => formData.append('images', file));
+      
+      let processed = 0;
+      progressText.textContent = `Processing ${processed} of ${files.length} images...`;
+      
+      try {
+        const response = await fetch('/upload-clothing', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          currentAnalysisResults = result.analyzed_items;
+          displayAnalysisResults(result);
+          
+          if (result.errors.length > 0) {
+            showNotification('Some images had issues: ' + result.errors.join(', '), 'warning');
+          } else {
+            showNotification(`Successfully analyzed ${result.total_processed} items!`, 'success');
+          }
+        } else {
+          showNotification('Analysis failed: ' + (result.message || 'Unknown error'), 'error');
+        }
+      } catch (error) {
+        console.error('Analysis error:', error);
+        showNotification('Network error during analysis', 'error');
+      } finally {
+        isAnalyzing = false;
+        uploadProgress.classList.add('hidden');
+      }
+    }
+
+    // Quick Analysis Function
+    async function performQuickAnalysis(file) {
+      quickAnalysisResult.innerHTML = '<div class="loading-spinner"></div> <span class="ml-2">Analyzing...</span>';
+      
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      try {
+        const response = await fetch('/analyze-single-item', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          const analysis = result.analysis;
+          quickAnalysisResult.innerHTML = `
+            <div class="bg-green-50 border border-green-200 rounded p-3">
+              <div class="font-medium">${analysis.name}</div>
+              <div class="text-sm text-gray-600">
+                ${analysis.type} • ${analysis.style} • Warmth: ${analysis.warmth_level}/5
+              </div>
+              <div class="text-xs text-green-600 mt-1">Confidence: ${Math.round(analysis.ai_confidence * 100)}%</div>
+            </div>
+          `;
+        } else {
+          quickAnalysisResult.innerHTML = `<div class="text-red-600">Analysis failed: ${result.error}</div>`;
+        }
+      } catch (error) {
+        quickAnalysisResult.innerHTML = `<div class="text-red-600">Network error</div>`;
+      }
+    }
+
+    // Display Analysis Results
+    function displayAnalysisResults(result) {
+      resultsContainer.innerHTML = '';
+      
+      result.analyzed_items.forEach((item, index) => {
+        const aiAnalysis = item.ai_analysis || {};
+        const confidence = Math.round((aiAnalysis.confidence || 0.8) * 100);
+        
+        const card = document.createElement('div');
+        card.className = 'analysis-card p-4 rounded-lg';
+        card.innerHTML = `
+          <div class="flex items-start space-x-3">
+            ${item.image_path ? `<img src="${item.image_path}" class="image-preview">` : '<div class="w-24 h-24 bg-gray-200 rounded flex items-center justify-center text-gray-500">No Image</div>'}
+            <div class="flex-1">
+              <h4 class="font-bold text-lg">${item.name}</h4>
+              <div class="space-y-1 text-sm">
+                <div><span class="font-medium">Type:</span> ${item.type}</div>
+                <div><span class="font-medium">Style:</span> ${item.style}</div>
+                <div><span class="font-medium">Color:</span> ${item.color}</div>
+                <div><span class="font-medium">Warmth:</span> ${item.warmth_level}/5</div>
+                <div><span class="font-medium">Weather:</span> ${item.weather_resistance.join(', ')}</div>
+              </div>
+              
+              <div class="mt-2">
+                <div class="text-xs text-gray-600 mb-1">AI Confidence: ${confidence}%</div>
+                <div class="confidence-bar">
+                  <div class="confidence-fill" style="width: ${confidence}%"></div>
+                </div>
+              </div>
+              
+              ${aiAnalysis.style_reasoning ? `
+                <div class="mt-2 text-xs text-gray-600">
+                  <strong>Reasoning:</strong> ${aiAnalysis.style_reasoning}
+                </div>
+              ` : ''}
+              
+              <div class="mt-3 flex space-x-2">
+                <button onclick="editItem(${index})" class="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600">
+                  ✏️ Edit
+                </button>
+                <button onclick="removeFromResults(${index})" class="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600">
+                  🗑️ Remove
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        resultsContainer.appendChild(card);
+      });
+      
+      analysisResults.classList.remove('hidden');
+    }
+
+    // Save All to Wardrobe
+    async function saveAllToWardrobe() {
+      if (currentAnalysisResults.length === 0) {
+        showNotification('No items to save', 'warning');
+        return;
+      }
+      
+      try {
+        loadCurrentWardrobe();
+        clearResults();
+        showNotification(`Saved ${currentAnalysisResults.length} items to wardrobe!`, 'success');
+      } catch (error) {
+        showNotification('Error saving items', 'error');
+      }
+    }
+
+    // Clear Results
+    function clearResults() {
+      currentAnalysisResults = [];
+      analysisResults.classList.add('hidden');
+      fileInput.value = '';
+    }
+
+    // Edit Item
+    function editItem(index) {
+      const item = currentAnalysisResults[index];
+      const newName = prompt('Edit item name:', item.name);
+      if (newName && newName !== item.name) {
+        item.name = newName;
+        displayAnalysisResults({ analyzed_items: currentAnalysisResults, errors: [] });
+      }
+    }
+
+    // Remove from Results
+    function removeFromResults(index) {
+      if (confirm('Remove this item from analysis results?')) {
+        currentAnalysisResults.splice(index, 1);
+        displayAnalysisResults({ analyzed_items: currentAnalysisResults, errors: [] });
+      }
+    }
+
+    // Load Current Wardrobe
+    async function loadCurrentWardrobe() {
+      try {
+        const response = await fetch('/wardrobe_items');
+        const items = await response.json();
+        
+        const wardrobeContainer = document.getElementById('currentWardrobe');
+        wardrobeContainer.innerHTML = '';
+        
+        if (items.length === 0) {
+          wardrobeContainer.innerHTML = `
+            <div class="col-span-full text-center py-8 text-gray-500">
+              <div class="text-4xl mb-2">👔</div>
+              <p>No items in your wardrobe yet.</p>
+              <p class="text-sm">Upload some images above to get started!</p>
+            </div>
+          `;
+          return;
+        }
+        
+        items.forEach(item => {
+          const aiAnalyzed = item.tags && item.tags.includes('ai_analyzed');
+          const card = document.createElement('div');
+          card.className = 'bg-gray-50 border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow';
+          card.innerHTML = `
+            <div class="flex items-start space-x-3">
+              ${item.image_path ? 
+                `<img src="${item.image_path}" class="w-16 h-16 object-cover rounded">` : 
+                `<div class="w-16 h-16 bg-gray-300 rounded flex items-center justify-center text-gray-500 text-xs">No Image</div>`
+              }
+              <div class="flex-1 min-w-0">
+                <h5 class="font-semibold text-sm truncate">${item.name}</h5>
+                <p class="text-xs text-gray-600">${item.color} ${item.type}</p>
+                <p class="text-xs text-gray-500">${item.fitting} • ${item.style}</p>
+                <div class="flex items-center justify-between mt-2">
+                  <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                    ${item.warmth_level}/5 warmth
+                  </span>
+                  ${aiAnalyzed ? 
+                    '<span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">🤖 AI</span>' : 
+                    '<span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">Manual</span>'
+                  }
+                </div>
+                <div class="flex space-x-1 mt-2">
+                  <button onclick="editWardrobeItem('${item.id}')" class="text-xs bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600">
+                    ✏️
+                  </button>
+                  <button onclick="deleteWardrobeItem('${item.id}')" class="text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">
+                    🗑️
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+          wardrobeContainer.appendChild(card);
+        });
+        
+      } catch (error) {
+        console.error('Error loading wardrobe:', error);
+        showNotification('Failed to load wardrobe', 'error');
+      }
+    }
+
+    // Edit Wardrobe Item
+    async function editWardrobeItem(itemId) {
+      const newName = prompt('Enter new name for this item:');
+      if (!newName) return;
+      
+      try {
+        const response = await fetch(`/update-clothing/${itemId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name: newName })
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+          loadCurrentWardrobe();
+          showNotification('Item updated successfully', 'success');
+        } else {
+          showNotification('Failed to update item', 'error');
+        }
+      } catch (error) {
+        showNotification('Error updating item', 'error');
+      }
+    }
+
+    // Delete Wardrobe Item
+    async function deleteWardrobeItem(itemId) {
+      if (!confirm('Are you sure you want to delete this item?')) return;
+      
+      try {
+        const response = await fetch(`/delete-clothing/${itemId}`, {
+          method: 'DELETE'
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+          loadCurrentWardrobe();
+          showNotification('Item deleted successfully', 'success');
+        } else {
+          showNotification('Failed to delete item', 'error');
+        }
+      } catch (error) {
+        showNotification('Error deleting item', 'error');
+      }
+    }
+
+    // Show Wardrobe Statistics
+    async function showWardrobeStats() {
+      try {
+        const response = await fetch('/wardrobe-stats');
+        const result = await response.json();
+        
+        if (result.success) {
+          const stats = result.stats;
+          const insights = result.insights;
+          
+          const statsContent = document.getElementById('statsContent');
+          statsContent.innerHTML = `
+            <div class="space-y-4">
+              <div class="grid grid-cols-2 gap-4">
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-blue-600">${stats.total_items}</div>
+                  <div class="text-sm text-gray-600">Total Items</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-green-600">${insights.ai_coverage}%</div>
+                  <div class="text-sm text-gray-600">AI Analyzed</div>
+                </div>
+              </div>
+              
+              <div>
+                <h5 class="font-semibold mb-2">Style Distribution</h5>
+                ${Object.entries(stats.by_style).map(([style, count]) => `
+                  <div class="flex justify-between text-sm">
+                    <span>${style}</span>
+                    <span>${count} items</span>
+                  </div>
+                `).join('')}
+              </div>
+              
+              <div>
+                <h5 class="font-semibold mb-2">Wardrobe Balance</h5>
+                <div class="text-sm text-gray-600">${insights.wardrobe_balance}% complete</div>
+                <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                  <div class="bg-blue-600 h-2 rounded-full" style="width: ${insights.wardrobe_balance}%"></div>
+                </div>
+              </div>
+              
+              ${stats.recommendations.length > 0 ? `
+                <div>
+                  <h5 class="font-semibold mb-2">Recommendations</h5>
+                  <ul class="text-sm space-y-1">
+                    ${stats.recommendations.map(rec => `<li class="text-gray-600">• ${rec}</li>`).join('')}
+                  </ul>
+                </div>
+              ` : ''}
+            </div>
+          `;
+          
+          document.getElementById('statsModal').classList.remove('hidden');
+        }
+      } catch (error) {
+        showNotification('Failed to load statistics', 'error');
+      }
+    }
+
+    // Notification System
+    function showNotification(message, type = 'info') {
+      const notification = document.createElement('div');
+      notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm ${
+        type === 'success' ? 'bg-green-500 text-white' :
+        type === 'error' ? 'bg-red-500 text-white' :
+        type === 'warning' ? 'bg-yellow-500 text-white' :
+        'bg-blue-500 text-white'
+      }`;
+      
+      notification.innerHTML = `
+        <div class="flex items-center justify-between">
+          <span>${message}</span>
+          <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">×</button>
+        </div>
+      `;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        if (notification.parentElement) {
+          notification.remove();
+        }
+      }, 5000);
+    }
+  </script>
+</body>
+</html>
